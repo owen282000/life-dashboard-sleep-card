@@ -231,7 +231,7 @@ export function laneOf(stage) {
 /**
  * Lanes from top to bottom. A night with a breakdown has awake, REM, light and deep
  * and a neutral lane below them for what has no depth; anything else is awake and
- * neutral. The same rule as the chart the integration draws.
+ * neutral.
  */
 export function chooseLanes(segments) {
   const stages = new Set(segments.map((segment) => segment.stage));

@@ -117,7 +117,7 @@ The iOS Companion app has no timeline of stages, so the card cannot draw a night
 
 ## Stage colors
 
-The colors are CSS variables, so a theme can set them. The defaults match the chart the integration draws.
+The colors are CSS variables, so a theme can set them.
 
 | Variable | Default |
 | --- | --- |
