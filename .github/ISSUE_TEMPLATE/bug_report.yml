@@ -1,0 +1,39 @@
+name: Bug report
+description: The card draws something wrong or does not load
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you expected, and what the card did. A screenshot helps; hide anything you would rather keep private.
+    validations:
+      required: true
+  - type: dropdown
+    id: sensor
+    attributes:
+      label: Which sensor does the card read?
+      options:
+        - Life Dashboard integration
+        - The official Android Companion app
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: The card, Home Assistant, and the integration or Companion app.
+      placeholder: "Card 0.1.0, Home Assistant 2026.11.0, integration 1.1.0"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser or app
+      placeholder: "Chrome on a laptop, or the Companion app on an iPhone"
+  - type: textarea
+    id: attributes
+    attributes:
+      label: Shape of the stages
+      description: How many stages the night has and which names occur. Please leave out the times if you would rather not share them.

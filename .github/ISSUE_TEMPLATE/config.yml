@@ -1,0 +1,18 @@
+# Questions belong in Discussions; a blank issue is rarely the right first step.
+blank_issues_enabled: false
+contact_links:
+  - name: Question or setup help
+    url: https://github.com/owen282000/life-dashboard-ha/discussions
+    about: Setup questions and ideas, in the Discussions of the Life Dashboard integration.
+  - name: Security vulnerability
+    url: https://github.com/owen282000/life-dashboard-sleep-card/security/advisories/new
+    about: Please report security vulnerabilities privately, not as a public issue.
+  - name: The Home Assistant integration
+    url: https://github.com/owen282000/life-dashboard-ha/issues
+    about: Sensors, statistics and the night chart image belong in the integration's repository.
+  - name: The Android app
+    url: https://github.com/owen282000/life-dashboard-companion-app/issues
+    about: Syncing and Health Connect problems on the phone belong in the app's repository.
+  - name: The iOS app
+    url: https://github.com/owen282000/life-dashboard-companion-app-ios/issues
+    about: Issues with the iOS app belong in its own repository.

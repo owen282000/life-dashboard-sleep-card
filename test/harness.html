@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sleep card harness</title>
+<style>
+  html { font-family: Roboto, "Helvetica Neue", Arial, sans-serif; }
+  body { margin: 0; padding: 24px; background: var(--primary-background-color); color: var(--primary-text-color); }
+  h2 { font-size: 13px; font-weight: 500; margin: 24px 0 8px; color: var(--secondary-text-color); }
+  h2:first-child { margin-top: 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .slot { flex: none; }
+  .theme-light {
+    --primary-background-color: #F3F6F4; --card-background-color: #FFFFFF; --ha-card-border-color: #D5DED9;
+    --divider-color: #E1E7E3; --primary-text-color: #101A15; --secondary-text-color: #56645D; --primary-color: #1E9665;
+  }
+  .theme-dark {
+    --primary-background-color: #0A0F0D; --card-background-color: #141C18; --ha-card-border-color: #27332D;
+    --divider-color: #222C27; --primary-text-color: #EEF4F0; --secondary-text-color: #A7B5AE; --primary-color: #30B77E;
+  }
+  .theme-ha-dark {
+    --primary-background-color: #111111; --card-background-color: #1C1C1C; --ha-card-border-color: #333333;
+    --divider-color: rgba(225, 225, 225, 0.12); --primary-text-color: #E1E1E1; --secondary-text-color: #9B9B9B; --primary-color: #03A9F4;
+  }
+  #results { white-space: pre-wrap; font: 12px monospace; }
+</style>
+</head>
+<body>
+<script type="module">
+  import { nights } from "./fixtures.mjs";
+  import "../dist/life-dashboard-sleep-card.js";
+
+  class FakeHaCard extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: "open" }).innerHTML = `<style>
+        :host { display: block; background: var(--ha-card-background, var(--card-background-color, #fff));
+          border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, #e0e0e0);
+          border-radius: var(--ha-card-border-radius, 12px); color: var(--primary-text-color); }
+      </style><slot></slot>`;
+    }
+  }
+  if (!customElements.get("ha-card")) customElements.define("ha-card", FakeHaCard);
+
+  const params = new URLSearchParams(location.search);
+  const theme = params.get("theme") || "light";
+  document.documentElement.className = `theme-${theme}`;
+  document.documentElement.dir = params.get("dir") || "ltr";
+
+  function makeHass(states, overrides = {}) {
+    const lang = params.get("lang") || "en-GB";
+    const timeFormat = params.get("hours") || "language";
+    return {
+      states,
+      language: lang,
+      locale: { language: lang, time_format: timeFormat, time_zone: "server", number_format: "language", date_format: "language", first_weekday: "language" },
+      config: { time_zone: "Europe/Amsterdam" },
+      themes: { darkMode: theme !== "light" },
+      ...overrides,
+    };
+  }
+
+  function mount(nightId, width, config = {}) {
+    const night = nights[nightId];
+    const states = { [night.state.entity_id]: night.state };
+    const card = document.createElement("life-dashboard-sleep-card");
+    card.setConfig({ entity: night.state.entity_id, ...config });
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    slot.style.width = `${width}px`;
+    slot.append(card);
+    card.hass = makeHass(states);
+    return slot;
+  }
+
+  async function runChecks() {
+    const out = [];
+    const check = (name, ok, detail = "") => out.push({ name, ok: Boolean(ok), detail: String(detail) });
+    const frame = () => new Promise((r) => setTimeout(r, 60));
+
+    const makeRow = (w) => { const d = document.createElement("div"); d.style.width = `${w}px`; document.body.append(d); return d; };
+
+    const host = makeRow(360);
+    const card = document.createElement("life-dashboard-sleep-card");
+    const denseState = nights.dense.state;
+    card.setConfig({ entity: denseState.entity_id });
+    host.append(card);
+    let hass = makeHass({ [denseState.entity_id]: denseState });
+    card.hass = hass;
+    await frame();
+    const sr = card.shadowRoot;
+    const q = (s) => sr.querySelector(s);
+    check("dense night draws 61 marks", sr.querySelectorAll(".seg").length === 61, sr.querySelectorAll(".seg").length);
+    check("dense night has an aria-label on the group", /asleep/.test(q('[role="group"]')?.getAttribute("aria-label") || ""), q('[role="group"]')?.getAttribute("aria-label"));
+    check("text alternative lists every segment", sr.querySelectorAll("table tr").length === 62, sr.querySelectorAll("table tr").length);
+    const plot = q(".plot");
+    check("plot is a single tab stop", plot.tabIndex === 0 && sr.querySelectorAll('[tabindex]').length === 1, sr.querySelectorAll('[tabindex]').length);
+
+    const renders = () => card._renders;
+    const before = renders();
+    card.hass = makeHass({ [denseState.entity_id]: denseState });
+    card.hass = { ...hass };
+    check("no re-render when nothing changed", renders() === before, `${before}->${renders()}`);
+    card.hass = makeHass({ [denseState.entity_id]: { ...denseState, attributes: { ...denseState.attributes } } });
+    check("no re-render for an equal copy of the state", renders() === before, `${before}->${renders()}`);
+    card.hass = makeHass({ [denseState.entity_id]: { ...denseState, state: "6.01" } });
+    check("re-render when the state changes", renders() === before + 1, `${before}->${renders()}`);
+    await frame();
+
+    // A one-minute awake blip on the phone width must be reachable from its lane.
+    const model = card._model;
+    const awakeIndexes = model.segments.flatMap((s, i) => (s.stage === "awake" ? [i] : []));
+    const blipIndex = awakeIndexes.find((i) => {
+      const seg = model.segments[i];
+      const others = awakeIndexes.filter((j) => j !== i).map((j) => Math.abs(card._marks[j].cx - card._marks[i].cx));
+      return seg.end - seg.start < 180000 && Math.min(...others) >= 24 && card._marks[i].cx > 40;
+    });
+    check("an isolated short awake blip exists to aim at", blipIndex !== undefined, blipIndex);
+    const box = q(".plot").getBoundingClientRect();
+    const mark = card._marks[blipIndex];
+    q(".plot").dispatchEvent(new PointerEvent("pointermove", { clientX: box.left + mark.cx + 9, clientY: box.top + 14, pointerType: "mouse", bubbles: true }));
+    check("hover snaps to a short blip from nine px away in its lane", card._active === blipIndex, `active ${card._active} blip ${blipIndex}`);
+    const tip = q(".tip");
+    check("tooltip shows stage, start, end and duration", /Awake/.test(tip.textContent) && /to/.test(tip.textContent) && /\d/.test(tip.textContent), tip.textContent);
+    check("tooltip stays inside the plot horizontally", tip.offsetLeft >= 0 && tip.offsetLeft + tip.offsetWidth <= q(".plot").clientWidth + 1, `${tip.offsetLeft} ${tip.offsetWidth}`);
+    q(".plot").dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse", bubbles: false }));
+    check("tooltip hides on leave", !tip.classList.contains("on"));
+
+    q(".plot").focus();
+    q(".plot").dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    check("arrow key moves to a segment", card._active === 1 && q(".tip").classList.contains("on"), card._active);
+    check("slider announces the segment", /of 61/.test(q(".plot").getAttribute("aria-valuetext")), q(".plot").getAttribute("aria-valuetext"));
+    q(".plot").dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    check("End goes to the last segment", card._active === 60, card._active);
+    q(".plot").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    check("Escape hides the tooltip", card._active === -1);
+    q(".plot").blur();
+
+    check("no horizontal overflow at 360px", sr.host.scrollWidth <= sr.host.clientWidth + 1 && q(".root").scrollWidth <= q(".root").clientWidth + 1, `${q(".root").scrollWidth}/${q(".root").clientWidth}`);
+    check("phone width shows the totals row and hides the lane totals", getComputedStyle(q(".totals")).display === "grid" && getComputedStyle(q(".lane-total")).display === "none");
+    const labels = [...sr.querySelectorAll(".tick-label")].map((t) => t.getBoundingClientRect());
+    let overlaps = 0;
+    for (let i = 1; i < labels.length; i++) if (labels[i].left < labels[i - 1].right) overlaps += 1;
+    check("tick labels never overlap at phone width", overlaps === 0 && labels.length >= 3, `${labels.length} labels`);
+    check("tick labels stay inside the plot", labels.every((l) => l.left >= q(".plot").getBoundingClientRect().left - 1 && l.right <= q(".plot").getBoundingClientRect().right + 1));
+
+    // Attribute values must never become markup.
+    window.__pwned = undefined;
+    const hostHostile = makeRow(520);
+    const hostile = document.createElement("life-dashboard-sleep-card");
+    hostHostile.append(hostile);
+    hostile.setConfig({ entity: nights.hostile.state.entity_id, title: '<img src=x onerror="window.__pwned=1">' });
+    hostile.hass = makeHass({ [nights.hostile.state.entity_id]: nights.hostile.state });
+    await frame();
+    check("hostile values create no elements", hostile.shadowRoot.querySelectorAll("img").length === 0 && window.__pwned === undefined);
+    check("hostile title renders as text", hostile.shadowRoot.querySelector(".title").textContent.includes("<img"));
+    check("hostile night still draws its valid segments", hostile.shadowRoot.querySelectorAll(".seg").length === 5, hostile.shadowRoot.querySelectorAll(".seg").length);
+    check("unknown is neutral and out of bed is drawn as awake", hostile.shadowRoot.querySelectorAll(".seg.s-neutral").length === 1 && [...hostile.shadowRoot.querySelectorAll(".lane-name")].some((n) => n.textContent === "Other"), hostile.shadowRoot.querySelectorAll(".seg.s-neutral").length);
+
+    // Empty and unavailable states.
+    for (const [id, text] of [["empty", "No sleep stages"], ["unavailable", "unavailable"]]) {
+      const c = document.createElement("life-dashboard-sleep-card");
+      makeRow(400).append(c);
+      c.setConfig({ entity: nights[id].state.entity_id });
+      c.hass = makeHass({ [nights[id].state.entity_id]: nights[id].state });
+      check(`${id} state shows its message`, c.shadowRoot.textContent.includes(text), c.shadowRoot.querySelector(".empty-figure")?.textContent);
+    }
+    const missing = document.createElement("life-dashboard-sleep-card");
+    makeRow(400).append(missing);
+    missing.setConfig({ entity: "sensor.gone" });
+    missing.hass = makeHass({});
+    check("missing entity names the entity", missing.shadowRoot.textContent.includes("sensor.gone"), missing.shadowRoot.textContent.slice(0, 90));
+
+    // Only-sleeping night draws without stage lanes.
+    const only = document.createElement("life-dashboard-sleep-card");
+    makeRow(400).append(only);
+    only.setConfig({ entity: nights.sleeping.state.entity_id });
+    only.hass = makeHass({ [nights.sleeping.state.entity_id]: nights.sleeping.state });
+    await frame();
+    check("sleeping-only night draws on an Asleep lane", only.shadowRoot.querySelectorAll(".seg").length === 2 && [...only.shadowRoot.querySelectorAll(".lane-name")].map((n) => n.textContent).join() === "Awake,Asleep", [...only.shadowRoot.querySelectorAll(".lane-name")].map((n) => n.textContent).join());
+    check("sleeping-only night states it has no stages", only.shadowRoot.querySelector(".note") !== null);
+    check("sleeping-only night claims no awake time", !/0m/.test(only.shadowRoot.querySelector(".totals").textContent + [...only.shadowRoot.querySelectorAll(".lane-total")].map((n) => n.textContent).join("")));
+
+    // RTL: the layout flips, the time axis stays readable left to right.
+    const rtlHost = makeRow(520);
+    rtlHost.dir = "rtl";
+    const rtl = document.createElement("life-dashboard-sleep-card");
+    rtlHost.append(rtl);
+    rtl.setConfig({ entity: nights.iphone.state.entity_id });
+    rtl.hass = makeHass({ [nights.iphone.state.entity_id]: nights.iphone.state });
+    await frame();
+    const firstLabel = rtl.shadowRoot.querySelector(".lane-name").getBoundingClientRect();
+    const rtlPlot = rtl.shadowRoot.querySelector(".plot").getBoundingClientRect();
+    check("rtl puts lane names on the right of the plot", firstLabel.left >= rtlPlot.right - 1, `${firstLabel.left} ${rtlPlot.right}`);
+    check("rtl keeps the time axis running left to right", getComputedStyle(rtl.shadowRoot.querySelector(".plot")).direction === "ltr");
+    check("no overflow in rtl", rtl.shadowRoot.querySelector(".root").scrollWidth <= rtl.shadowRoot.querySelector(".root").clientWidth + 1);
+
+    // The official Android companion app's shape.
+    const companionState = nights.companion.state;
+    const companionCard = document.createElement("life-dashboard-sleep-card");
+    makeRow(520).append(companionCard);
+    companionCard.setConfig({ entity: companionState.entity_id });
+    companionCard.hass = makeHass({ [companionState.entity_id]: companionState });
+    await frame();
+    const companionFigure = companionCard.shadowRoot.querySelector(".figure").textContent;
+    check("companion lists draw as segments", companionCard.shadowRoot.querySelectorAll(".seg").length === companionCard._model.segments.length && companionCard._model.segments.length > 15, companionCard._model.segments.length);
+    check("companion state is not read as hours", /^\d+h( \d+m)?$/.test(companionFigure) && parseInt(companionFigure, 10) < 12, `${companionFigure} from state ${companionState.state}`);
+    check("awake_in_bed draws in the awake lane", companionCard.shadowRoot.querySelectorAll(".seg.s-awake").length >= 1 && !companionCard._model.segments.some((s) => s.stage === "awake_in_bed"));
+    const mismatch = document.createElement("life-dashboard-sleep-card");
+    makeRow(400).append(mismatch);
+    mismatch.setConfig({ entity: nights.companionNoTimeline.state.entity_id });
+    mismatch.hass = makeHass({ [nights.companionNoTimeline.state.entity_id]: nights.companionNoTimeline.state });
+    check("unequal lists show the empty state", mismatch.shadowRoot.querySelector(".empty-figure")?.textContent === "No sleep stages yet", mismatch.shadowRoot.querySelector(".empty-figure")?.textContent);
+
+    // Picker support and editor.
+    const Card = customElements.get("life-dashboard-sleep-card");
+    const stub = Card.getStubConfig(makeHass({ "sensor.a": { entity_id: "sensor.a", state: "1", attributes: {} }, [denseState.entity_id]: denseState }));
+    check("getStubConfig finds a sensor with stages", stub.entity === denseState.entity_id, stub.entity);
+    const companionStub = Card.getStubConfig(makeHass({ "sensor.a": { entity_id: "sensor.a", state: "1", attributes: {} }, [nights.companion.state.entity_id]: nights.companion.state }));
+    check("getStubConfig finds the companion shape", companionStub.entity === nights.companion.state.entity_id, companionStub.entity);
+    check("getStubConfig falls back to the companion sensor name", Card.getStubConfig(makeHass({}), ["sensor.x_health_connect_sleep_duration"]).entity === "sensor.x_health_connect_sleep_duration");
+    check("getStubConfig without a sensor is usable", Card.getStubConfig(makeHass({})).entity === "");
+    check("registered in window.customCards", window.customCards.some((c) => c.type === "life-dashboard-sleep-card"));
+    check("grid options are auto height", card.getGridOptions().rows === "auto");
+    let threw = false;
+    try { document.createElement("life-dashboard-sleep-card").setConfig({}); } catch { threw = true; }
+    check("setConfig rejects a config without entity", threw);
+
+    let changed = null;
+    class FakeHaForm extends HTMLElement {}
+    customElements.define("ha-form", FakeHaForm);
+    const editor = Card.getConfigElement();
+    document.body.append(editor);
+    editor.setConfig({ entity: denseState.entity_id });
+    editor.hass = makeHass({ [denseState.entity_id]: denseState, [nights.companion.state.entity_id]: nights.companion.state, "sensor.plain": { entity_id: "sensor.plain", state: "1", attributes: {} } });
+    editor.addEventListener("config-changed", (e) => { changed = e.detail.config; });
+    const form = editor.shadowRoot.querySelector("ha-form");
+    check("editor renders ha-form with entity and title fields", form && form.schema.map((s) => s.name).join() === "entity,title", form?.schema?.map((s) => s.name));
+    check("editor hands hass and data to ha-form", form.hass === editor._hass && form.data.entity === denseState.entity_id);
+    const picked = form.schema[0].selector.entity.include_entities || [];
+    check("entity picker lists either shape and no other sensors", picked.includes(denseState.entity_id) && picked.includes(nights.companion.state.entity_id) && !picked.includes("sensor.plain"), picked.join());
+    form.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { title: "Night" } } }));
+    check("editor emits config-changed", changed?.title === "Night" && changed.entity === denseState.entity_id, JSON.stringify(changed));
+
+    const fails = out.filter((r) => !r.ok);
+    const pre = document.createElement("pre");
+    pre.id = "results";
+    pre.textContent = `CHECKS ${out.length - fails.length}/${out.length}\n` + out.map((r) => `${r.ok ? "PASS" : "FAIL"}  ${r.name}  [${r.detail}]`).join("\n");
+    document.body.replaceChildren(pre);
+  }
+
+  if (params.has("check")) {
+    runChecks();
+  } else if (params.has("one")) {
+    document.body.append(mount(params.get("one"), Number(params.get("width") || 600), params.get("title") ? { title: params.get("title") } : {}));
+    if (params.get("hover") !== null && params.get("hover") !== undefined && document.querySelector("life-dashboard-sleep-card")) {
+      const card = document.querySelector("life-dashboard-sleep-card");
+      setTimeout(() => {
+        const plot = card.shadowRoot.querySelector(".plot");
+        const box = plot.getBoundingClientRect();
+        const mark = card._marks?.[Number(params.get("hover") || 10)];
+        if (mark) plot.dispatchEvent(new PointerEvent("pointermove", { clientX: box.left + mark.cx, clientY: box.top + mark.y + 7, pointerType: "mouse", bubbles: true }));
+      }, 200);
+    }
+  } else {
+    const wide = Number(params.get("wide") || 620);
+    const phone = Number(params.get("phone") || 360);
+    const scenes = (params.get("scenes") || "android,iphone,companion,dense,sleeping,empty").split(",");
+    const titles = { android: "Android night", iphone: "iPhone night with stages", companion: "Official Android companion app, parallel lists", dense: "Dense night, 61 segments", sleeping: "Only sleeping, no stages", empty: "Empty state" };
+    for (const scene of scenes) {
+      const heading = document.createElement("h2");
+      heading.textContent = titles[scene] || scene;
+      const row = document.createElement("div");
+      row.className = "row";
+      row.append(mount(scene, wide, {}), mount(scene, phone, {}));
+      document.body.append(heading, row);
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+name: Release file
+
+# The Marketplace installs life-dashboard-sleep-card.js from the release, so every release
+# needs that file, and its download count is the install count.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to attach the file to again"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  file:
+    name: Attach life-dashboard-sleep-card.js
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+      - name: Check the card's version matches the tag
+        run: |
+          VERSION=$(sed -n 's/^export const VERSION = "\(.*\)";$/\1/p' dist/life-dashboard-sleep-card.js)
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "The card says $VERSION, the release is $TAG"
+            exit 1
+          fi
+      - name: Upload to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" dist/life-dashboard-sleep-card.js --clobber --repo "$GITHUB_REPOSITORY"
