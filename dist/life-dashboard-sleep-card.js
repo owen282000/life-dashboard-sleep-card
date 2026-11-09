@@ -2,7 +2,7 @@
 // A single ES module with no dependencies and no build step. The pure data
 // functions are exported so test/data.test.mjs can run them under Node.
 
-export const VERSION = "0.1.0";
+export const VERSION = "1.0.0";
 
 const CARD_TAG = "life-dashboard-sleep-card";
 const EDITOR_TAG = "life-dashboard-sleep-card-editor";
