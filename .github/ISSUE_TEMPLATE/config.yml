@@ -9,7 +9,7 @@ contact_links:
     about: Please report security vulnerabilities privately, not as a public issue.
   - name: The Home Assistant integration
     url: https://github.com/owen282000/life-dashboard-ha/issues
-    about: Sensors, statistics and the night chart image belong in the integration's repository.
+    about: Sensors and statistics belong in the integration's repository.
   - name: The Android app
     url: https://github.com/owen282000/life-dashboard-companion-app/issues
     about: Syncing and Health Connect problems on the phone belong in the app's repository.

@@ -33,4 +33,4 @@ The Marketplace installs `life-dashboard-sleep-card.js` from the release, and it
 
 ## Where things belong
 
-The card only draws. Sensors, statistics and the night chart image are in the [integration](https://github.com/owen282000/life-dashboard-ha), and syncing is in the phone apps.
+The card only draws. Sensors and statistics are in the [integration](https://github.com/owen282000/life-dashboard-ha), and syncing is in the phone apps.
