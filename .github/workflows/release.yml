@@ -25,13 +25,20 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.TAG }}
-      - name: Check the card's version matches the tag
+      - name: Check the version matches the tag in all three places
         run: |
-          VERSION=$(sed -n 's/^export const VERSION = "\(.*\)";$/\1/p' dist/life-dashboard-sleep-card.js)
-          if [ "$VERSION" != "$TAG" ]; then
-            echo "The card says $VERSION, the release is $TAG"
+          CARD=$(sed -n 's/^export const VERSION = "\(.*\)";$/\1/p' dist/life-dashboard-sleep-card.js)
+          PACKAGE=$(node -p "require('./package.json').version")
+          if [ "$CARD" != "$TAG" ] || [ "$PACKAGE" != "$TAG" ]; then
+            echo "The card says $CARD and package.json $PACKAGE, the release is $TAG"
             exit 1
           fi
+          if ! grep -q "^## \[$TAG\]" CHANGELOG.md; then
+            echo "CHANGELOG.md has no section for $TAG"
+            exit 1
+          fi
+      - name: Run the tests
+        run: npm test
       - name: Upload to the release
         env:
           GH_TOKEN: ${{ github.token }}

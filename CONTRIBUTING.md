@@ -25,6 +25,12 @@ node test/render.mjs /tmp/sleep-card
 
 Commit messages and pull request titles follow `type: Sentence with a capital`, such as `fix: Keep the hour ticks inside the plot`. Add a line under `## [Unreleased]` in `CHANGELOG.md` when a user would notice the change.
 
+## Releasing
+
+Versions are strict semver (`X.Y.Z`) and live in four places that must agree: `VERSION` in `dist/life-dashboard-sleep-card.js`, `version` in `package.json`, the section in `CHANGELOG.md`, and the git tag, which is the version without a prefix. A GitHub release on the tag is what the Marketplace offers to users.
+
+The Marketplace installs `life-dashboard-sleep-card.js` from the release, and its download count is the install count. The `Release file` workflow runs the tests and attaches the file when a release is published, and fails when the versions do not match the tag. For an older release without the file, run the workflow by hand with that tag.
+
 ## Where things belong
 
 The card only draws. Sensors, statistics and the night chart image are in the [integration](https://github.com/owen282000/life-dashboard-ha), and syncing is in the phone apps.

@@ -24,7 +24,7 @@ body:
     attributes:
       label: Versions
       description: The card, Home Assistant, and the integration or Companion app.
-      placeholder: "Card 0.1.0, Home Assistant 2026.11.0, integration 1.1.0"
+      placeholder: "Card 1.0.0, Home Assistant 2026.11.0, integration 1.1.0"
     validations:
       required: true
   - type: input
