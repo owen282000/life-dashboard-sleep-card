@@ -6,11 +6,11 @@
 
 <p align="center">
   <b>One night of sleep as a hypnogram on your Home Assistant dashboard.</b><br>
-  Each stage in its own lane along the night's clock, with time asleep and each stage's duration and share. No cloud in between, no account, no tracking.
+  Each stage in its own lane along the night's clock, with time asleep and each stage's duration and share.
 </p>
 
 <p align="center">
-  <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=owen282000&repository=life-dashboard-sleep-card&category=plugin"><img src="https://img.shields.io/badge/Marketplace-Custom%20repository-41BDF5" alt="Add to the Home Assistant Marketplace as a custom repository"></a>
+  <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=owen282000&repository=life-dashboard-sleep-card&category=plugin"><img src="https://img.shields.io/badge/Marketplace-Listed-41BDF5" alt="Listed in the Home Assistant Marketplace"></a>
   <a href="https://github.com/owen282000/life-dashboard-sleep-card/releases/latest"><img src="https://img.shields.io/github/v/release/owen282000/life-dashboard-sleep-card?label=Release&color=30b77e" alt="Latest release"></a>
   <a href="https://www.home-assistant.io/"><img src="https://img.shields.io/badge/Home%20Assistant-2026.3%2B-41BDF5" alt="Home Assistant 2026.3 or newer"></a>
   <a href="https://github.com/owen282000/life-dashboard-sleep-card/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="MIT license"></a>
@@ -65,13 +65,9 @@ Stage values are `awake`, `light`, `deep`, `rem`, `sleeping`, `out_of_bed` and `
 
 ### Through the Home Assistant Marketplace
 
+In **Settings > Marketplace** (HACS before Home Assistant 2026.11), search for **Life Dashboard Sleep Card** and download it. The button opens it in your Home Assistant straight away:
+
 [![Open your Home Assistant instance and open this repository in the Marketplace](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=owen282000&repository=life-dashboard-sleep-card&category=plugin)
-
-The button adds this repository and opens it. It needs Home Assistant 2026.11 or HACS. By hand, until the card is in the Marketplace's default list:
-
-1. Open the Marketplace, open the three dots menu in the top right and choose **Custom repositories**
-2. Add `https://github.com/owen282000/life-dashboard-sleep-card` with the type **Dashboard**
-3. Find **Life Dashboard Sleep Card** and download it
 
 On storage mode dashboards the resource is registered for you. If your dashboards are in YAML mode, add it yourself:
 
