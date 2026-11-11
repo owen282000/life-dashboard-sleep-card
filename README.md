@@ -40,7 +40,7 @@
 
 The card reads one sensor and draws what was in it: awake at the top, deep at the bottom, the night running left to right. It needs a sensor with sleep stages. That can be the [Life Dashboard integration](https://github.com/owen282000/life-dashboard-ha) 1.1.0 or newer, with the Life Dashboard Companion app on your phone, or on Android the official Home Assistant Companion app, without Life Dashboard.
 
-Have a sensor with real state history, such as a sleep tracking app that reports live? Lavve's [Hypnogram card](https://github.com/Lavve/lovelace-hypnogram-card) is built for exactly that. This card is for nights that arrive after the fact, as a list of stages.
+Prefer a different look, or have a sensor with real state history, such as a sleep tracking app that reports live? Lavve's [Hypnogram card](https://github.com/Lavve/lovelace-hypnogram-card) handles both, and from version 0.1.9 it reads the same `stages` list with `stages_attribute: stages`.
 
 <a href="https://play.google.com/store/apps/details?id=com.owen282000.lifedashboard&referrer=utm_source%3Dgh-card-readme%26utm_medium%3Dreadme"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="60" align="middle"></a> <a href="https://apps.apple.com/app/apple-store/id6824075761?pt=128699800&ct=gh-card-readme&mt=8"><img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/badges/app-store.png" alt="Download on the App Store" height="40" align="middle"></a>
 
