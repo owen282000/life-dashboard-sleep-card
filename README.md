@@ -21,28 +21,34 @@
   &nbsp;·&nbsp;
   <a href="https://github.com/owen282000/life-dashboard-sleep-card#configure">Configure</a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/owen282000/life-dashboard-sleep-card#already-use-the-home-assistant-companion-app">Companion&nbsp;app</a>
+  <a href="https://github.com/owen282000/life-dashboard-sleep-card#already-use-the-home-assistant-companion-app">Without&nbsp;Life&nbsp;Dashboard</a>
   &nbsp;·&nbsp;
   <a href="https://owen282000.com/life-dashboard/">Website</a>
 </p>
 
+<!-- life-dashboard:nav -->
 <p align="center">
-  <sub>Life Dashboard: <a href="https://github.com/owen282000/life-dashboard-companion-app">Android app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-companion-app-ios">iPhone app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-ha">Home Assistant integration</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-stack">Grafana stack</a> &nbsp;·&nbsp; <b>Sleep card</b> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-screen-time-card">Screen time cards</a></sub>
+  <sub>Life Dashboard: <a href="https://github.com/owen282000/life-dashboard-companion-app">Android app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-companion-app-ios">iPhone app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-ha">Home Assistant integration</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-stack">Grafana stack</a> &nbsp;·&nbsp; <b>Sleep card</b> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-screen-time-card">Screen time cards</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-year-card">Year card</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-activity-card">Activity card</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-before-bed-card">Before bed card</a></sub>
 </p>
+<!-- /life-dashboard:nav -->
 
 <p align="center">
   <picture>
     <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/readme-hero-phone.png">
-    <img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/readme-hero.png" alt="The card on a dark theme: 5h 14m asleep, the night's date and times, four lanes for awake, REM, light and deep with the stages as blocks along an hour axis, and each stage's duration and share next to its lane" width="900">
+    <img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/readme-hero.png" alt="The Sleep card: time asleep, the night's date and times, and lanes for awake, REM, light and deep with the stages as blocks along an hour axis" width="900">
   </picture>
-  <br><sub>Sample data</sub>
+  <br><sub>Sample data. Each stage's duration and share sits next to its lane, or below the chart at phone width.</sub>
 </p>
 
-The card reads one sensor and draws what was in it: awake at the top, deep at the bottom, the night running left to right. It needs a sensor with sleep stages. That can be the [Life Dashboard integration](https://github.com/owen282000/life-dashboard-ha) 1.1.0 or newer, with the Life Dashboard Companion app on your phone, or on Android the official Home Assistant Companion app, without Life Dashboard.
+The card reads one sensor and draws what was in it: awake at the top, deep at the bottom, the night running left to right.
 
-Prefer a different look, or have a sensor with real state history, such as a sleep tracking app that reports live? Lavve's [Hypnogram card](https://github.com/Lavve/lovelace-hypnogram-card) handles both, and from version 0.1.9 it reads the same `stages` list with `stages_attribute: stages`.
+With the Life Dashboard app the card fills itself: last night's stages from Health Connect or Apple Health, on Android and on iPhone, and every night kept on its own date in Home Assistant's long-term statistics. The app is listed on Google Play and the App Store as Health Data for Home Assistant.
 
 <a href="https://play.google.com/store/apps/details?id=com.owen282000.lifedashboard&referrer=utm_source%3Dgh-card-readme%26utm_medium%3Dreadme"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="60" align="middle"></a> <a href="https://apps.apple.com/app/apple-store/id6824075761?pt=128699800&ct=gh-card-readme&mt=8"><img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/badges/app-store.png" alt="Download on the App Store" height="40" align="middle"></a>
+
+The card needs a sensor with sleep stages. With the Life Dashboard app that sensor comes from the [Life Dashboard integration](https://github.com/owen282000/life-dashboard-ha), 1.1.0 or newer. The card also works without Life Dashboard: on Android it reads the sleep sensor of [Home Assistant's Companion app](#already-use-the-home-assistant-companion-app).
+
+Prefer a different look, or have a sensor with real state history, such as a sleep tracking app that reports live? Lavve's [Hypnogram card](https://github.com/Lavve/lovelace-hypnogram-card) handles both, and from version 0.1.9 it reads the same `stages` list with `stages_attribute: stages`.
 
 ## What you get
 
@@ -57,9 +63,9 @@ Prefer a different look, or have a sensor with real state history, such as a sle
 The card runs in your browser and reads two shapes of sensor, with nothing to configure:
 
 - **Life Dashboard**: a sensor such as `sensor.your_phone_last_sleep_asleep`, with a `stages` attribute: a list of `{"stage": "...", "start": "<ISO 8601>", "end": "<ISO 8601>"}`.
-- **The official Android Companion app**: `sensor.your_phone_health_connect_sleep_duration`, with the parallel lists `stageTypes`, `stageStartTimes` and `stageEndTimes`.
+- **Home Assistant's Companion app for Android**: `sensor.your_phone_health_connect_sleep_duration`, with the parallel lists `stageTypes`, `stageStartTimes` and `stageEndTimes`.
 
-Stage values are `awake`, `light`, `deep`, `rem`, `sleeping`, `out_of_bed` and `unknown`, plus the Companion app's `awake_in_bed`, which counts as awake. Other names are drawn as neutral, and entries that cannot be read are skipped.
+Stage values are `awake`, `light`, `deep`, `rem`, `sleeping`, `out_of_bed` and `unknown`, plus `awake_in_bed` from Home Assistant's Companion app, which counts as awake. Other names are drawn as neutral, and entries that cannot be read are skipped.
 
 ## Install
 
@@ -82,6 +88,12 @@ lovelace:
 
 Copy `dist/life-dashboard-sleep-card.js` into the `www` folder of your Home Assistant configuration and add it as a resource of the type JavaScript module with the URL `/local/life-dashboard-sleep-card.js`.
 
+### Is it working?
+
+After downloading, refresh your browser. Until you do, the dashboard shows "Custom element doesn't exist: life-dashboard-sleep-card".
+
+With Life Dashboard, `sensor.your_phone_last_sleep_asleep` only appears once the phone has synced a first night with sleep stages. So on day one the card picker can be empty: the sensor shows up after the first night your watch or sleep app has tracked.
+
 ## Configure
 
 Add the card from the card picker, which offers the sensors that carry a night, or in YAML:
@@ -102,14 +114,14 @@ Language, time format and time zone follow your Home Assistant profile.
 
 ## Already use the Home Assistant Companion app?
 
-Then on Android you don't need Life Dashboard for this card. It works on its own with the official Companion app, which needs:
+Then on Android you don't need Life Dashboard for this card. It works on its own with Home Assistant's Companion app, which needs:
 
 - **The Android Companion app 2026.11.1 or newer**, the version that added the stages.
 - **The Sleep duration sensor switched on**, under Settings, Companion app, Manage sensors, with Health Connect access for sleep. The stages only come with that sensor, not with the separate per-stage duration sensors.
 
 The sensor's state is in minutes and the card doesn't use it: time asleep comes from the stages. Life Dashboard adds the history around the night: every day in long-term statistics, and both phones.
 
-The iOS Companion app has no timeline of stages, so the card cannot draw a night from it. On an iPhone, use the Life Dashboard app and integration.
+Home Assistant's Companion app for iOS has no timeline of stages, so the card cannot draw a night from it. On an iPhone, use the Life Dashboard app and integration.
 
 ## Stage colors
 
@@ -163,6 +175,12 @@ This card sits on top of Life Dashboard's other parts, and you only install the 
 
 The card only reads the sensor state Home Assistant already gives your browser, and makes no requests of its own. It has no telemetry or analytics, and there's no server of mine in the path.
 
+<!-- life-dashboard:built -->
+## How this is built
+
+Life Dashboard is a one-person project, and [Claude Code](https://claude.com/claude-code) writes a large part of the code. I decide what gets built, read every change before it is merged, and test it on my own phones and Home Assistant before a release. Automated checks run on every pull request, and the [AI policy](https://github.com/owen282000/life-dashboard-companion-app/blob/main/AI_POLICY.md) explains what the AI does and what I check.
+<!-- /life-dashboard:built -->
+
 ## Documentation
 
 - [Changelog](https://github.com/owen282000/life-dashboard-sleep-card/blob/main/CHANGELOG.md)
@@ -180,8 +198,10 @@ Stars, shares and good bug reports all help. If you want to chip in for the even
 
 MIT licensed. See [LICENSE](https://github.com/owen282000/life-dashboard-sleep-card/blob/main/LICENSE).
 
+<!-- life-dashboard:footer -->
 <p align="center">
   <sub>Made by <a href="https://github.com/owen282000">Owen Vogelaar</a> for the self-hosting and quantified self crowd.</sub><br>
   <sub>Google Play and the Google Play logo are trademarks of Google LLC.</sub><br>
   <sub>Apple, the Apple logo and App Store are trademarks of Apple Inc.</sub>
 </p>
+<!-- /life-dashboard:footer -->
