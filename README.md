@@ -27,7 +27,7 @@
 </p>
 
 <p align="center">
-  <sub>Life Dashboard: <a href="https://github.com/owen282000/life-dashboard-companion-app">Android app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-companion-app-ios">iPhone app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-ha">Home Assistant integration</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-stack">Grafana stack</a> &nbsp;·&nbsp; <b>Sleep card</b></sub>
+  <sub>Life Dashboard: <a href="https://github.com/owen282000/life-dashboard-companion-app">Android app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-companion-app-ios">iPhone app</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-ha">Home Assistant integration</a> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-stack">Grafana stack</a> &nbsp;·&nbsp; <b>Sleep card</b> &nbsp;·&nbsp; <a href="https://github.com/owen282000/life-dashboard-screen-time-card">Screen time cards</a></sub>
 </p>
 
 <p align="center">
@@ -133,6 +133,7 @@ This card sits on top of Life Dashboard's four projects, and you only install th
   <a href="https://github.com/owen282000/life-dashboard-ha"><img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/family/ha.png" alt="Home Assistant integration: sensors and all your history" width="400"></a>
   <a href="https://github.com/owen282000/life-dashboard-stack"><img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/family/stack.png" alt="Grafana stack: Postgres and Grafana dashboards" width="400"></a>
   <img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/family/sleep-card-here.png" alt="Sleep card: one night, stage by stage (this repository)" width="400">
+  <a href="https://github.com/owen282000/life-dashboard-screen-time-card"><img src="https://raw.githubusercontent.com/owen282000/life-dashboard-sleep-card/main/docs/family/screen-time-card.png" alt="Screen time cards: today, the week and the family" width="400"></a>
 </p>
 
 ## Privacy
