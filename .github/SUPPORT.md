@@ -8,7 +8,7 @@ The [README](../README.md#install) covers installing through the Marketplace and
 
 ## The card stays empty
 
-The card needs a sensor with sleep stages. With Life Dashboard that is `sensor.your_phone_last_sleep_asleep`, which needs the integration's 1.1.0 or newer. Older nights need **Send history** in the phone app. With the official Android Companion app, switch on the Sleep duration sensor.
+The card needs a sensor with sleep stages. With Life Dashboard that is `sensor.your_phone_last_sleep_asleep`, which needs the integration's 1.1.0 or newer. Older nights need **Send history** in the phone app. With Home Assistant's Companion app for Android, switch on the Sleep duration sensor.
 
 ## Still stuck, or want to ask something
 
